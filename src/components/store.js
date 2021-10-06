@@ -15,6 +15,10 @@ const toDos = createSlice({
     ],
     remove: (state, action) =>
       state.filter((toDo) => toDo.id !== action.payload),
+    changeType: (state, action) =>
+      state.map((payload) => {
+        return item == 3452 ? 1010 : item;
+      }),
   },
 });
 
