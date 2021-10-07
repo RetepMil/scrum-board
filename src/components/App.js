@@ -5,9 +5,9 @@ import Board from "./Board";
 function App() {
   return (
     <Provider store={store}>
-      <Board type="todo" />
-      <Board type="inprogess" />
-      <Board type="done" />
+      <Board className="board-container" type="todo" />
+      <Board className="board-container" type="inprogess" />
+      <Board className="board-container" type="done" />
     </Provider>
   );
 }
