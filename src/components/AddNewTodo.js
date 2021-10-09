@@ -3,16 +3,18 @@ import { connect } from "react-redux";
 import { dbService } from "../fbase";
 import { add } from "./store";
 
-const AddNewTodo = () => {
+const AddNewTodo = ({ addToDo }) => {
   const [newTask, setNewTask] = useState("");
   const onSubmit = async (e) => {
     e.preventDefault();
+    const newId = Date.now();
     const task = {
+      id: newId,
       text: newTask,
-      id: Date.now(),
       type: "todo",
     };
-    await dbService.collection("tasks").add(task);
+    await dbService.doc(`tasks/${newId.toString()}`).set({ ...task });
+    addToDo(task);
     setNewTask("");
   };
 
@@ -28,7 +30,7 @@ const AddNewTodo = () => {
         value={newTask}
         placeholder="Enter new task here"
       ></input>
-      <button>Add</button>
+      <input type="submit" value="ADD"></input>
     </form>
   );
 };

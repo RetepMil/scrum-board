@@ -29,4 +29,4 @@ const mapStateToProps = (state) => {
   return { items: state };
 };
 
-export default connect(mapStateToProps, null)(Board);
+export default connect(mapStateToProps)(Board);

@@ -1,31 +1,47 @@
 import { configureStore, createSlice } from "@reduxjs/toolkit";
 import { dbService } from "../fbase";
 
-let initialState = dbService.collection("jjiks").onSnapshot();
+const getTasksData = async () => {
+  const snapshot = await dbService.collection("tasks").get();
+  return snapshot.docs.map((doc) => ({
+    ...doc.data(),
+  }));
+};
 
 const items = createSlice({
   name: "itemsReducer",
-  initialState,
+  initialState: [],
   reducers: {
     add: (state, action) => [
       {
-        text: action.payload.text,
         id: action.payload.id,
+        text: action.payload.text,
         type: action.payload.type,
       },
       ...state,
     ],
     remove: (state, action) =>
       state.filter((item) => item.id !== action.payload),
-    edit: (state, action) =>
-      state.map((i) =>
+    edit: (state, action) => {
+      return state.map((i) =>
         i.id === action.payload.id
-          ? { text: action.payload.text, id: i.id, type: action.payload.type }
+          ? {
+              id: i.id,
+              text: action.payload.text,
+              type: action.payload.type,
+            }
           : i
-      ),
+      );
+    },
   },
+});
+
+const store = configureStore({ reducer: items.reducer });
+
+getTasksData().then((res) => {
+  res.map((task) => store.dispatch(add(task)));
 });
 
 export const { add, remove, edit } = items.actions;
 
-export default configureStore({ reducer: items.reducer });
+export default store;

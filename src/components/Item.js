@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { connect } from "react-redux";
 import { dbService } from "../fbase";
-import store, { remove, edit } from "./store";
+import { remove, edit } from "./store";
 
-const Item = ({ text, type, items, onDeleteClick, editToDo }) => {
+const Item = ({ id, text, type, onDeleteClick, editToDo }) => {
   const [editMode, setEditMode] = useState(false);
   const [editTextTo, setEditTextTo] = useState(text);
   const [editTypeTo, setEditTypeTo] = useState(type);
 
   const onEditClick = () => {
     setEditMode(true);
+  };
+  const onCancelClick = () => {
+    setEditMode(false);
   };
   const onTextToChange = (e) => {
     setEditTextTo(e.target.value);
@@ -18,32 +21,39 @@ const Item = ({ text, type, items, onDeleteClick, editToDo }) => {
     setEditTypeTo(e.target.value);
   };
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
-    //editToDo()
+    const updateTo = {
+      id,
+      text: editTextTo,
+      type: editTypeTo,
+    };
+    await dbService.doc(`tasks/${id.toString()}`).update({ ...updateTo });
+    editToDo(updateTo);
+    setEditTextTo(updateTo.text);
+    setEditTypeTo(updateTo.type);
     setEditMode(false);
   };
-
-  store.subscribe(() => {
-    console.log(items);
-  });
 
   return (
     <div className="item-container">
       {editMode ? (
-        <form onSubmit={onSubmit} id="edit-form">
-          <input
-            onChange={onTextToChange}
-            type="text"
-            value={editTextTo}
-          ></input>
-          <input
-            onChange={onTypeToChange}
-            type="text"
-            value={editTypeTo}
-          ></input>
-          <button>OK</button>
-        </form>
+        <>
+          <form onSubmit={onSubmit} id="edit-form">
+            <input
+              onChange={onTextToChange}
+              type="text"
+              value={editTextTo}
+            ></input>
+            <select name="types" defaultValue={type} onChange={onTypeToChange}>
+              <option value="todo">toDo</option>
+              <option value="inprogress">In Progress</option>
+              <option value="done">Done</option>
+            </select>
+            <button>OK</button>
+          </form>
+          <button onClick={onCancelClick}>Cancel</button>
+        </>
       ) : (
         <>
           {text}
@@ -55,21 +65,17 @@ const Item = ({ text, type, items, onDeleteClick, editToDo }) => {
   );
 };
 
-const mapStateToProps = (state) => {
-  return { items: state };
-};
-
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     onDeleteClick: async () => {
       const ok = window.confirm("Are you sure you want to delete this?");
       if (ok) {
         dispatch(remove(ownProps.id));
-        await dbService.doc(`tasks/${ownProps.id}`).delete();
+        await dbService.doc(`tasks/${ownProps.id.toString()}`).delete();
       }
     },
     editToDo: (info) => dispatch(edit(info)),
   };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Item);
+export default connect(null, mapDispatchToProps)(Item);
