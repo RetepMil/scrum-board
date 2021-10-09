@@ -1,11 +1,23 @@
 import { connect } from "react-redux";
-import { add } from "./store";
 import Item from "./Item";
+
+const showName = (type) => {
+  switch (type) {
+    case "todo":
+      return "To Do";
+    case "inprogress":
+      return "In Progress";
+    case "done":
+      return "Done";
+    default:
+      return "";
+  }
+};
 
 const Board = ({ items, type }) => {
   return (
     <>
-      <h2>{type}</h2>
+      <h2 className="board-name">{showName(type)}</h2>
       {items.map((item) =>
         item.type === type ? <Item {...item} key={item.id} /> : null
       )}
@@ -17,10 +29,4 @@ const mapStateToProps = (state) => {
   return { items: state };
 };
 
-const mapDispatchToProps = (dispatch) => {
-  return {
-    addToDo: (info) => dispatch(add(info)),
-  };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Board);
+export default connect(mapStateToProps, null)(Board);

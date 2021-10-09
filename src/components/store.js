@@ -1,11 +1,10 @@
 import { configureStore, createSlice } from "@reduxjs/toolkit";
+import { dbService } from "../fbase";
 
-let initialState = [
-  { text: "Finish html css js", id: parseInt(Date.now), type: "todo" },
-];
+let initialState = dbService.collection("jjiks").onSnapshot();
 
-const toDos = createSlice({
-  name: "toDosReducer",
+const items = createSlice({
+  name: "itemsReducer",
   initialState,
   reducers: {
     add: (state, action) => [
@@ -17,18 +16,16 @@ const toDos = createSlice({
       ...state,
     ],
     remove: (state, action) =>
-      state.filter((toDo) => toDo.id !== action.payload),
-    changeText: (state, action) =>
+      state.filter((item) => item.id !== action.payload),
+    edit: (state, action) =>
       state.map((i) =>
-        i.id === action.id ? { text: action.text, id: i.id, type: i.type } : i
-      ),
-    changeType: (state, action) =>
-      state.map((i) =>
-        i.id === action.id ? { text: i.text, id: i.id, type: action.type } : i
+        i.id === action.payload.id
+          ? { text: action.payload.text, id: i.id, type: action.payload.type }
+          : i
       ),
   },
 });
 
-export const { add, remove, changeType, changeText } = toDos.actions;
+export const { add, remove, edit } = items.actions;
 
-export default configureStore({ reducer: toDos.reducer });
+export default configureStore({ reducer: items.reducer });
